@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-px
+spec:
+  hostIPC: true
+  hostNetwork: true
+  containers:
+  - name: nginx
+    image: nginx
+    securityContext:
+      privileged: true
+    volumeMounts:
+    - name: test
+      mountPath: /data
+    - name: lib
+      mountPath: /var/lib/kubelet
+    - name: run
+      mountPath: /run
+    - name: sys
+      mountPath: /sys
+    ports:
+    - containerPort: 80
+  volumes:
+    - name: test
+      flexVolume:
+        driver: "osd/flexvolume"
+        fsType: "ext4"
+        options:
+          volumeID: "71649490835256109"
+          size: "1G"
+          osdDriver: "pxd"
+    - name: lib
+      hostPath:
+        path: /var/lib/kubelet
+    - name: run
+      hostPath:
+        path: /run
+    - name: sys
+      hostPath:
+        path: /sys

@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: px-lite-controller
+spec:
+  replicas: 1
+  selector:
+    app: px-lite-kubernetes
+  template:
+   metadata:
+     labels:
+       app: px-lite-kubernetes
+   spec:
+     hostIPC: true
+     hostNetwork: true
+     volumes:
+         - name: plugins
+           hostPath:
+             path: /run/docker/plugins
+         - name: osd
+           hostPath:
+             path: /var/lib/osd
+         - name: dev
+           hostPath:
+             path: /dev
+         - name: pwx
+           hostPath:
+             path: /etc/pwx
+         - name: run
+           hostPath:
+             path: /var/run/docker.sock
+         - name: cores
+           hostPath:
+             path: /var/cores
+         - name: lib
+           hostPath:
+             path: /var/lib/kubelet 
+     containers:
+       - name: px-lite-kubernetes
+         image: adityadani/px-lite:dev
+         securityContext:
+           privileged: true
+           #runAsUser: 0
+         volumeMounts:
+           - name: plugins
+             mountPath: /run/docker/plugins
+           - name: osd
+             mountPath: /var/lib/osd
+           - name: dev
+             mountPath: /dev
+           - name: pwx
+             mountPath: /etc/pwx
+           - name: run
+             mountPath: /var/run/docker.sock
+           - name: cores
+             mountPath: /var/cores
+           - name: lib
+             mountPath: /var/lib/kubelet 

@@ -1,0 +1,56 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: osd-daemon
+  labels:
+    app: osd-daemon
+spec:
+  template:
+   metadata:
+     labels:
+       app: osd-daemon
+       name: osd-daemon
+   spec:
+     hostIPC: true
+     hostNetwork: true
+     volumes:
+         - name: plugins
+           hostPath:
+             path: /run/docker/plugins
+         - name: osd
+           hostPath:
+             path: /var/lib/osd
+         - name: run
+           hostPath:
+             path: /var/run/docker.sock
+         - name: lib
+           hostPath:
+             path: /var/lib/kubelet 
+         - name: openstorage
+           hostPath:
+             path: /var/lib/openstorage 
+     containers:
+       - name: osd
+         image: openstorage/osd:latest
+         command: ["/osd"]
+         args: 
+           - "-d"
+           - "--file=/var/lib/osd/config.yaml"
+           - "--kvdb=etcd-kv://etcd-client:2379"
+         securityContext:
+           privileged: true
+           #runAsUser: 0
+         ports:
+           - containerPort: 2345
+             hostPort: 2345
+         volumeMounts:
+           - name: plugins
+             mountPath: /run/docker/plugins
+           - name: osd
+             mountPath: /var/lib/osd
+           - name: run
+             mountPath: /var/run/docker.sock
+           - name: lib
+             mountPath: /var/lib/kubelet
+           - name: openstorage
+             mountPath: /var/lib/openstorage
